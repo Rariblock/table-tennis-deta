@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#12304a">
+<title>卓球試合ノート</title>
+<style>
+:root{--navy:#12304a;--blue:#176da5;--bg:#f2f6fa;--line:#dce5ee;--muted:#62758a;--green:#16845b;--red:#c34b4b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#1c3044;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif}
+header{background:linear-gradient(130deg,#10283e,#1b5c83);color:white;padding:24px 17px}header .inner,main{max-width:760px;margin:auto}header small{color:#c2e0f3;letter-spacing:.12em}h1{font-size:24px;margin:7px 0}header p{margin:0;color:#d9eaf5;font-size:13px}
+main{padding:15px 12px 40px}.privacy{font-size:12px;line-height:1.65;background:#fff8e8;border:1px solid #ead7a6;color:#765719;border-radius:12px;padding:12px;margin-bottom:13px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:13px}.stat,.card{background:white;border:1px solid var(--line);border-radius:14px}.stat{padding:12px}.stat small{font-size:11px;color:var(--muted)}.stat strong{display:block;font-size:23px;margin-top:4px}
+nav{display:flex;gap:7px;overflow:auto;margin-bottom:12px}.tab{border:1px solid var(--line);background:white;border-radius:30px;padding:10px 14px;white-space:nowrap;color:#52677c;font-weight:700}.tab.active{background:var(--navy);color:white}
+.card{padding:15px;margin-bottom:12px}.card h2{font-size:17px;margin:0 0 13px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:11px}.field{min-width:0}.full{grid-column:1/-1}label{display:block;font-size:12px;font-weight:700;color:#425970;margin-bottom:5px}input,select,textarea{width:100%;padding:12px;border:1px solid #cbd7e2;border-radius:10px;background:white;font:inherit;font-size:15px;color:#1c3044}textarea{min-height:78px;resize:vertical}input:focus,select:focus,textarea:focus{outline:2px solid #9bc9e9}
+button,.filelabel{font:inherit;font-weight:700;border:0;border-radius:10px;padding:12px 15px;background:var(--blue);color:white;cursor:pointer}.secondary{background:#eaf1f7;color:#29475f}.danger{background:#fff0f0;color:var(--red)}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}.actions button{flex:1}.hidden{display:none!important}
+.tip{font-size:12px;color:var(--muted);line-height:1.6;margin:10px 0 0}.record{border:1px solid var(--line);border-radius:12px;padding:13px;margin-top:10px}.recordhead{display:flex;justify-content:space-between;gap:10px}.record h3{font-size:15px;margin:0 0 4px}.muted{font-size:12px;color:var(--muted)}.score{font-size:20px;font-weight:800;white-space:nowrap}.win{color:var(--green)}.lose{color:var(--red)}.tag{display:inline-block;background:#edf3f8;border-radius:20px;padding:4px 8px;font-size:11px;margin:8px 4px 4px 0}.detail{font-size:13px;line-height:1.65;color:#40566c;margin-top:5px;white-space:pre-wrap}.detail b{color:#1e3850}.empty{text-align:center;color:var(--muted);font-size:13px;padding:25px 5px}.search{margin-bottom:8px}.status{font-size:12px;color:var(--green);min-height:18px;margin-top:8px}.footer{text-align:center;color:var(--muted);font-size:11px;padding:12px}
+@media(max-width:480px){.formgrid{grid-template-columns:1fr 1fr}.card{padding:13px}.stat{padding:10px}.stat strong{font-size:21px}}
+</style>
+</head>
+<body>
+<header><div class="inner"><small>PERSONAL TABLE TENNIS RECORD</small><h1>🏓 卓球試合ノート</h1><p>試合を記録して、次の対戦に活かそう。</p></div></header>
+<main>
+<div class="privacy">🔒 <b>保存について</b><br>入力した記録はこのブラウザ内に保存されます。保存後にはバックアップファイル（JSON）をダウンロードできます。GitHub Pagesのサイト自体は公開URLになるため、実名などを他人に見られたくない場合は入力内容に注意してください。</div>
+<div class="stats">
+ <div class="stat"><small>試合数</small><strong id="count">0</strong></div>
+ <div class="stat"><small>勝利</small><strong id="wins" class="win">0</strong></div>
+ <div class="stat"><small>勝率</small><strong id="rate">0%</strong></div>
+</div>
+<nav>
+ <button class="tab active" data-page="entry">試合を入力</button>
+ <button class="tab" data-page="history">試合一覧</button>
+ <button class="tab" data-page="files">ファイル保存・復元</button>
+</nav>
+<section id="entry" class="card">
+ <h2 id="formHeading">新しい試合を記録</h2>
+ <form id="matchForm">
+  <input type="hidden" id="recordId">
+  <div class="formgrid">
+   <div class="field"><label for="date">試合日 *</label><input id="date" type="date" required></div>
+   <div class="field"><label for="event">大会・練習試合名</label><input id="event" placeholder="例：市大会"></div>
+   <div class="field"><label for="opponent">相手の名前 *</label><input id="opponent" required placeholder="相手の名前"></div>
+   <div class="field"><label for="school">相手の学校</label><input id="school" placeholder="学校名"></div>
+   <div class="field"><label for="result">結果 *</label><select id="result"><option>勝ち</option><option>負け</option><option>引き分け</option></select></div>
+   <div class="field"><label for="score">スコア *</label><input id="score" required placeholder="例：3-1"></div>
+   <div class="field"><label for="style">相手の戦型</label><select id="style"><option value="">選択なし</option><option>ドライブ型</option><option>前陣速攻型</option><option>カットマン</option><option>ブロック型</option><option>異質型</option><option>その他・不明</option></select></div>
+   <div class="field"><label for="position">自分のプレー位置</label><select id="position"><option value="">選択なし</option><option>前陣</option><option>前中陣</option><option>中陣</option><option>後陣</option></select></div>
+   <div class="field full"><label for="good">自分の良かったところ</label><textarea id="good" placeholder="例：フォアカウンターがよく決まった"></textarea></div>
+   <div class="field full"><label for="improve">自分の改善点</label><textarea id="improve" placeholder="次に直したいところ"></textarea></div>
+   <div class="field full"><label for="strength">相手の強み</label><textarea id="strength" placeholder="相手が得意そうなプレー"></textarea></div>
+   <div class="field full"><label for="weakness">相手の弱点・苦手そうな展開</label><textarea id="weakness" placeholder="試合中に気づいたこと"></textarea></div>
+   <div class="field full"><label for="plan">次に対戦するときの対策</label><textarea id="plan" placeholder="次回に試したい作戦"></textarea></div>
+   <div class="field full"><label for="memo">その他メモ</label><textarea id="memo" placeholder="自由記入"></textarea></div>
+  </div>
+  <div class="actions"><button type="submit" id="saveButton">試合を保存してファイルにする</button><button type="button" id="cancelButton" class="secondary hidden">編集をキャンセル</button></div>
+  <p class="tip">保存ボタンを押すと、ブラウザ内に記録し、バックアップJSONファイルのダウンロードを開始します。iPhoneではダウンロードの確認が表示される場合があります。</p>
+  <div id="saveStatus" class="status" aria-live="polite"></div>
+ </form>
+</section>
+<section id="history" class="card hidden">
+ <h2>試合一覧</h2>
+ <input id="search" class="search" placeholder="相手の名前・学校名・大会名で検索">
+ <div id="recordList"></div>
+</section>
+<section id="files" class="card hidden">
+ <h2>ファイルに保存・復元</h2>
+ <p class="tip">「バックアップをダウンロード」で、登録済みの全試合を1つのJSONファイルに保存できます。ファイルはiPhoneの「ファイル」アプリのダウンロードフォルダなどで確認してください。</p>
+ <div class="actions"><button id="downloadButton">バックアップをダウンロード</button><label class="filelabel secondary" for="restoreFile">バックアップを読み込む</label><input id="restoreFile" class="hidden" type="file" accept=".json,application/json"></div>
+ <div id="fileStatus" class="status" aria-live="polite"></div>
+</section>
+<div class="footer">卓球試合ノート · この端末のブラウザに保存</div>
+</main>
+<script>
+(function(){
+'use strict';
+const STORAGE_KEY='table_tennis_note_records_v2';
+const ids=['date','event','opponent','school','result','score','style','position','good','improve','strength','weakness','plan','memo'];
+const $=id=>document.getElementById(id);
+let records=[];
+try{const saved=localStorage.getItem(STORAGE_KEY);records=saved?JSON.parse(saved):[];if(!Array.isArray(records))records=[];}catch(e){records=[];}
+function persist(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(records));return true;}catch(e){alert('端末内の保存容量が不足している可能性があります。バックアップをダウンロードしてください。');return false;}}
+function safe(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function update(){
+ const wins=records.filter(r=>r.result==='勝ち').length;
+ $('count').textContent=records.length;$('wins').textContent=wins;$('rate').textContent=records.length?Math.round(wins/records.length*100)+'%':'0%';
+ const query=$('search').value.trim().toLowerCase();
+ const list=records.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')).filter(r=>[r.opponent,r.school,r.event].join(' ').toLowerCase().includes(query));
+ $('recordList').innerHTML=list.length?list.map(r=>`<article class="record"><div class="recordhead"><div><h3>${safe(r.opponent)} <span class="muted">／ ${safe(r.school||'学校未入力')}</span></h3><div class="muted">${safe(r.date)} · ${safe(r.event||'大会名なし')}</div></div><div class="score ${r.result==='勝ち'?'win':r.result==='負け'?'lose':''}">${safe(r.score)}</div></div><span class="tag">${safe(r.result)}</span>${r.style?`<span class="tag">${safe(r.style)}</span>`:''}${r.position?`<span class="tag">自分：${safe(r.position)}</span>`:''}<div class="detail">${r.good?`<b>良かったところ：</b>${safe(r.good)}<br>`:''}${r.improve?`<b>改善点：</b>${safe(r.improve)}<br>`:''}${r.strength?`<b>相手の強み：</b>${safe(r.strength)}<br>`:''}${r.weakness?`<b>相手の弱点：</b>${safe(r.weakness)}<br>`:''}${r.plan?`<b>次回の対策：</b>${safe(r.plan)}<br>`:''}${r.memo?`<b>メモ：</b>${safe(r.memo)}`:''}</div><div class="actions"><button type="button" class="secondary" data-edit="${safe(r.id)}">編集</button><button type="button" class="danger" data-delete="${safe(r.id)}">削除</button></div></article>`).join(''):'<div class="empty">まだ試合記録がありません。<br>「試合を入力」から追加してください。</div>';
+}
+function downloadBackup(){
+ const payload={app:'卓球試合ノート',version:1,exportedAt:new Date().toISOString(),records:records};
+ const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json;charset=utf-8'});
+ const url=URL.createObjectURL(blob);const a=document.createElement('a');
+ a.href=url;a.download='takkyu-match-backup-'+new Date().toISOString().slice(0,10)+'.json';
+ document.body.appendChild(a);a.click();a.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),1500);
+}
+function switchPage(page){
+ document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
+ ['entry','history','files'].forEach(id=>$(id).classList.toggle('hidden',id!==page));
+}
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>switchPage(b.dataset.page)));
+$('date').value=new Date().toLocaleDateString('sv-SE');
+function resetForm(){
+ $('matchForm').reset();$('recordId').value='';$('date').value=new Date().toLocaleDateString('sv-SE');
+ $('formHeading').textContent='新しい試合を記録';$('saveButton').textContent='試合を保存してファイルにする';$('cancelButton').classList.add('hidden');
+}
+$('matchForm').addEventListener('submit',function(e){
+ e.preventDefault();
+ const id=$('recordId').value;
+ const item={id:id||('m'+Date.now())};
+ ids.forEach(k=>item[k]=$(k).value.trim());
+ if(id){records=records.map(r=>r.id===id?item:r);}else{records.push(item);}
+ const ok=persist();update();
+ if(ok){
+   $('saveStatus').textContent='記録を保存しました。バックアップファイルを作成しています…';
+   downloadBackup();
+   $('saveStatus').textContent='記録を保存しました。バックアップファイルのダウンロードを開始しました。';
+   resetForm();switchPage('history');
+ }else{$('saveStatus').textContent='端末内保存を確認できません。ファイル保存を試してください。';}
+});
+$('cancelButton').addEventListener('click',resetForm);
+$('search').addEventListener('input',update);
+$('recordList').addEventListener('click',function(e){
+ const edit=e.target.closest('[data-edit]');const del=e.target.closest('[data-delete]');
+ if(edit){const r=records.find(x=>x.id===edit.dataset.edit);if(!r)return;ids.forEach(k=>$(k).value=r[k]||'');$('recordId').value=r.id;$('formHeading').textContent='試合記録を編集';$('saveButton').textContent='変更を保存してファイルにする';$('cancelButton').classList.remove('hidden');switchPage('entry');window.scrollTo(0,0);}
+ if(del&&confirm('この試合記録を削除しますか？')){records=records.filter(x=>x.id!==del.dataset.delete);persist();update();}
+});
+$('downloadButton').addEventListener('click',function(){downloadBackup();$('fileStatus').textContent='バックアップファイルのダウンロードを開始しました。';});
+$('restoreFile').addEventListener('change',async function(e){
+ const file=e.target.files&&e.target.files[0];if(!file)return;
+ try{
+  const parsed=JSON.parse(await file.text());
+  const incoming=Array.isArray(parsed)?parsed:parsed.records;
+  if(!Array.isArray(incoming)||!incoming.every(r=>r&&typeof r==='object'&&r.id&&r.opponent))throw new Error('invalid');
+  if(confirm('現在の記録を、ファイル内の記録に置き換えます。よろしいですか？')){
+   records=incoming;persist();update();$('fileStatus').textContent='バックアップを復元しました。';
+  }
+ }catch(err){alert('ファイルを読み込めませんでした。卓球試合ノートのJSONバックアップを選んでください。');}
+ e.target.value='';
+});
+update();
+})();
+</script>
+</body>
+</html>
